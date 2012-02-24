@@ -1,0 +1,85 @@
+@import "version.inc";
+@import "outercurve.inc";
+
+package {
+    name: "nasm";
+    version: "${package-version}";
+    arch : "x86";
+    
+    display-name: "The Netwide assmembler";
+    location: "http://coapp.org/repository/${OutputFilename}";
+
+    feed: "http://coapp.org/repository/packages.atom.xml";
+    publisher: "CoApp Project";
+}
+
+files[exes] {
+    root: @"..\";
+    
+    include: {
+        "nasm.exe",
+        "ndisasm.exe",
+    };
+    
+    trim-path: all;
+};
+
+license[bsd] {
+    license-url: "http://www.opensource.org/licenses/bsd-license.php";
+    license-type: "bsd";
+}
+
+files[files-to-sign] {
+    include: { 
+        exes,
+    };    
+}
+
+metadata {
+    summary: "The Netwide assmembler";
+    description: @"The Netwide Assembler (NASM) is an assembler and disassembler for the Intel x86 architecture. It can be used to write 16-bit, 32-bit (IA-32) and 64-bit (x86-64) programs. NASM is considered to be one of the most popular assemblers for Linux."; // or path to a file...
+    
+    icon: @"zlib3d-b1.png";
+    
+    author-version : "2.10rc8";
+    bug-tracker: "http://bugzilla.nasm.us/";
+    stability : "0";
+    licenses : {
+        bsd
+    };
+}
+
+compatability-policy {
+    minimum: "2.10.8.0";
+    maximum: "${OneLessThanCurrent}"; // this is the default
+    versions : {
+        "2.10",
+    }; // if not specified, find the versions by looking at the feeds and finding all the major/minor versions in range.
+}
+
+application {
+    include : {
+        exes
+    };
+}
+
+package-composition {
+    symlinks : { 
+        exes => @"${bin}\${each.Name}" = @"${packagedir}\${each.Name}";
+    };
+}
+
+signing {
+    attributes : {
+        company="Outercurve Foundation, CoApp Project",
+        description="${Package.PackageDetails.SummaryDescription}",
+        product-name="nasm",
+        product-version="${package-version}",
+        file-version="${package-version}",
+    };
+    
+    replace-signature: true; 
+    include: { 
+        files-to-sign
+    };    
+}

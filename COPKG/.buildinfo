@@ -1,0 +1,92 @@
+/* target information */
+@import "version.inc";
+
+#product-info  {
+	product-name: "nasm";
+	version: "${package-version}";
+	original-source-location: "http://www.nasm.us/pub/nasm/releasebuilds/2.10rc8/";
+	original-source-website: "http://www.nasm.us/";
+	license: "Simplified BSD License";
+	packager: "garrett serack <garretts@microsoft.com>";
+}
+
+test {
+
+}
+
+package {
+ default : false;
+    uses : release;
+    
+    targets: { 
+        "copkg\nasm-${package-version}-x86.msi"
+    };
+    
+    build-command : @"
+        cd COPKG
+        autopackage nasm.autopkg || goto failed
+        ptk update-version
+    ";
+}
+
+update-version {
+    default : false;
+    
+    build-command : @"
+        REM auto-increment version.inc file...
+        
+        cd COPKG
+        setlocal EnableDelayedExpansion
+        for /F ""tokens=4,5,6,7  delims=.; "" %%v in (version.inc) do (
+            set /a build=%%y + 1
+            set VERSTRING=#define { package-version: %%v.%%w.%%x.!build!; }
+        )
+        echo !VERSTRING! > version.inc
+    ";
+}
+
+release {
+    set: { 
+        BUILD_CFG ="release";
+    };
+    
+    uses : {
+        x86
+    };
+}
+
+debug {
+    default : false;
+
+    set: { 
+        BUILD_CFG ="debug";
+    };
+    
+    uses : {
+        x86
+    };
+}
+
+x86 { 
+    default : false;
+
+    targets : { 
+        "nasm.exe",
+        "ndisasm.exe",
+    };
+
+    set: { 
+        OUTPUT_ARCH="x86";
+        OUTPUT_VERSION="${package-version}"; // this got picked up from the @import rule at the top.
+    };
+    
+    compiler: vc10;
+    platform: x86; 
+    
+    build-command : @" 
+        nmake -f Mkfiles\msvc.mak || goto failed
+    ";
+    clean-command : @" 
+        nmake -f Mkfiles\msvc.mak clean || goto failed
+    ";
+}
