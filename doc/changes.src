@@ -4,8 +4,67 @@
 
 \H{cl-2.xx} NASM 2 Series
 
-The NASM 2 series support x86-64, and is the production version of NASM
+The NASM 2 series supports x86-64, and is the production version of NASM
 since 2007.
+
+\S{cl-2.10.07} Version 2.10.07
+
+\b Fix line continuation parsing being broken in previous version.
+
+
+\S{cl-2.10.06} Version 2.10.06
+
+\b Always quote the dependency source names when using the automatic
+dependency generation options.
+
+\b If no dependency target name is specified via the \c{-MT} or
+\c{-MQ} options, quote the default output name.
+
+\b Fix assembly of shift operations in \c{CPU 8086} mode.
+
+\b Fix incorrect generation of explicit immediate byte for shift by 1
+under certain circumstances.
+
+\b Fix assembly of the \c{VPCMPGTQ} instruction.
+
+\b Fix RIP-relative relocations in the \c{macho64} backend.
+
+\S{cl-2.10.05} Version 2.10.05
+
+\b Add the \c{CLAC} and \c{STAC} instructions.
+
+\S{cl-2.10.04} Version 2.10.04
+
+\b Add back the inadvertently deleted 256-bit version of the \c{VORPD}
+instruction.
+
+\b Correct disassembly of instructions starting with byte \c{82} hex.
+
+\b Fix corner cases in token pasting, for example:
+
+\c    %define N 1e%++%+ 5
+\c            dd N, 1e+5
+
+\S{cl-2.10.03} Version 2.10.03
+
+\b Correct the assembly of the instruction:
+
+\c XRELEASE MOV [absolute],AL
+
+Previous versions would incorrectly generate \c{F3 A2} for this
+instruction and issue a warning; correct behavior is to emit \c{F3 88
+05}.
+
+\S{cl-2.10.02} Version 2.10.02
+
+\b Add the \c{ifunc} macro package with integer functions, currently
+only integer logarithms.  See \k{pkg_ifunc}.
+
+\b Add the \c{RDSEED}, \c{ADCX} and \c{ADOX} instructions.
+
+\S{cl-2.10.01} Version 2.10.01
+
+\b Add missing VPMOVMSKB instruction with reg32, ymmreg operands.
 
 \S{cl-2.10} Version 2.10
 
@@ -18,6 +77,16 @@ since 2007.
 
 To force a specific form, use the \c{STRICT} keyword, see \k{strict}.
 
+\b Add support for the Intel AVX2 instruction set.
+
+\b Add support for Bit Manipulation Instructions 1 and 2.
+
+\b Add support for Intel Transactional Synchronization Extensions (TSX).
+
+\b Add support for x32 ELF (32-bit ELF with the CPU in 64-bit mode.)
+   See \k{elffmt}.
+
+\b Add support for bigendian UTF-16 and UTF-32.  See \k{unicode}.
 
 \S{cl-2.09.10} Version 2.09.10
 
@@ -25,7 +94,6 @@ To force a specific form, use the \c{STRICT} keyword, see \k{strict}.
    absence or corruption. It brings in a few additional questions
    to a user during deinstallation procedure but still it is better
    than unpredictable file removal.
-
 
 \S{cl-2.09.09} Version 2.09.09
 
@@ -193,12 +261,6 @@ To force a specific form, use the \c{STRICT} keyword, see \k{strict}.
 \S{cl-2.08} Version 2.08
 
 \b A number of enhancements/fixes in macros area.
-
-\#\b Support for arbitrarily terminating macro expansions \c{%exitmacro}.
-\#  See \k{exitmacro}.
-
-\#\b Support for recursive macro expansion \c{%rmacro}/\c{%irmacro}.
-\#  See \k{mlrmacro}.
 
 \b Support for converting strings to tokens.  See \k{deftok}.
 

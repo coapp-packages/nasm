@@ -59,7 +59,7 @@ char *rdl_errors[5] = {
 
 int rdl_verify(const char *filename)
 {
-    FILE *fp = fopen(filename, "rb");
+    FILE *fp;
     char buf[257];
     int i;
     int32_t length;
@@ -69,6 +69,7 @@ int rdl_verify(const char *filename)
     if (lastresult != -1 && !strcmp(filename, lastverified))
         return lastresult;
 
+    fp = fopen(filename, "rb");
     strcpy(lastverified, filename);
 
     if (!fp)
@@ -77,7 +78,7 @@ int rdl_verify(const char *filename)
     while (!feof(fp)) {
         i = 0;
 
-        while (fread(buf + i, 1, 1, fp) == 1 && buf[i] && i < 257)
+        while (fread(buf + i, 1, 1, fp) == 1 && i < 257 && buf[i])
             i++;
         if (feof(fp))
             break;
@@ -98,8 +99,10 @@ int rdl_verify(const char *filename)
             fread(buf, 6, 1, fp);
             buf[6] = 0;
             if (strncmp(buf, "RDOFF", 5)) {
+                fclose(fp);
                 return rdl_error = lastresult = 2;
             } else if (buf[5] != '2') {
+                fclose(fp);
                 return rdl_error = lastresult = 3;
             }
         }
@@ -161,7 +164,7 @@ int rdl_searchlib(struct librarynode *lib, const char *label, rdffile * f)
         i = strlen(lib->name);
         buf[i++] = '.';
         t = i;
-        while (fread(buf + i, 1, 1, lib->fp) == 1 && buf[i] && i < 512)
+        while (fread(buf + i, 1, 1, lib->fp) == 1 && i < 512 && buf[i])
             i++;
 
         buf[i] = 0;
@@ -238,7 +241,7 @@ int rdl_openmodule(struct librarynode *lib, int moduleno, rdffile * f)
         i = strlen(buf);
         buf[i++] = '.';
         t = i;
-        while (fread(buf + i, 1, 1, lib->fp) == 1 && buf[i] && i < 512)
+        while (fread(buf + i, 1, 1, lib->fp) == 1 && i < 512 && buf[i])
             i++;
         buf[i] = 0;
         if (feof(lib->fp))

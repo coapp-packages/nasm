@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------- *
  *   
- *   Copyright 1996-2010 The NASM Authors - All Rights Reserved
+ *   Copyright 1996-2012 The NASM Authors - All Rights Reserved
  *   See the file AUTHORS included with the NASM distribution for
  *   the specific copyright holders.
  *
@@ -112,50 +112,43 @@ static uint64_t getu64(uint8_t *data)
 /* Important: regval must already have been adjusted for rex extensions */
 static enum reg_enum whichreg(opflags_t regflags, int regval, int rex)
 {
+    size_t i;
+
+    static const struct {
+        opflags_t       flags;
+        enum reg_enum   reg;
+    } specific_registers[] = {
+        {REG_AL,  R_AL},
+        {REG_AX,  R_AX},
+        {REG_EAX, R_EAX},
+        {REG_RAX, R_RAX},
+        {REG_DL,  R_DL},
+        {REG_DX,  R_DX},
+        {REG_EDX, R_EDX},
+        {REG_RDX, R_RDX},
+        {REG_CL,  R_CL},
+        {REG_CX,  R_CX},
+        {REG_ECX, R_ECX},
+        {REG_RCX, R_RCX},
+        {FPU0,    R_ST0},
+        {XMM0,    R_XMM0},
+        {YMM0,    R_YMM0},
+        {REG_ES,  R_ES},
+        {REG_CS,  R_CS},
+        {REG_SS,  R_SS},
+        {REG_DS,  R_DS},
+        {REG_FS,  R_FS},
+        {REG_GS,  R_GS}
+    };
+
     if (!(regflags & (REGISTER|REGMEM)))
 	return 0;		/* Registers not permissible?! */
 
     regflags |= REGISTER;
 
-    if (!(REG_AL & ~regflags))
-        return R_AL;
-    if (!(REG_AX & ~regflags))
-        return R_AX;
-    if (!(REG_EAX & ~regflags))
-        return R_EAX;
-    if (!(REG_RAX & ~regflags))
-	return R_RAX;
-    if (!(REG_DL & ~regflags))
-        return R_DL;
-    if (!(REG_DX & ~regflags))
-        return R_DX;
-    if (!(REG_EDX & ~regflags))
-        return R_EDX;
-    if (!(REG_RDX & ~regflags))
-        return R_RDX;
-    if (!(REG_CL & ~regflags))
-        return R_CL;
-    if (!(REG_CX & ~regflags))
-        return R_CX;
-    if (!(REG_ECX & ~regflags))
-        return R_ECX;
-    if (!(REG_RCX & ~regflags))
-        return R_RCX;
-    if (!(FPU0 & ~regflags))
-        return R_ST0;
-    if (!(XMM0 & ~regflags))
-	return R_XMM0;
-    if (!(YMM0 & ~regflags))
-	return R_YMM0;
-    if (!(REG_CS & ~regflags))
-        return (regval == 1) ? R_CS : 0;
-    if (!(REG_DESS & ~regflags))
-        return (regval == 0 || regval == 2
-                || regval == 3 ? nasm_rd_sreg[regval] : 0);
-    if (!(REG_FSGS & ~regflags))
-        return (regval == 4 || regval == 5 ? nasm_rd_sreg[regval] : 0);
-    if (!(REG_SEG67 & ~regflags))
-        return (regval == 6 || regval == 7 ? nasm_rd_sreg[regval] : 0);
+    for (i = 0; i < ARRAY_SIZE(specific_registers); i++)
+        if (!(specific_registers[i].flags & ~regflags))
+            return specific_registers[i].reg;
 
     /* All the entries below look up regval in an 16-entry array */
     if (regval < 0 || regval > 15)
@@ -331,12 +324,12 @@ static uint8_t *do_ea(uint8_t *data, int modrm, int asize,
 
             op->scale = 1 << scale;
 
-	    if (index == 4 && !(rex & REX_X))
-		op->indexreg = -1; /* ESP/RSP cannot be an index */
-	    else if (type == EA_XMMVSIB)
+	    if (type == EA_XMMVSIB)
 		op->indexreg = nasm_rd_xmmreg[index | ((rex & REX_X) ? 8 : 0)];
 	    else if (type == EA_YMMVSIB)
 		op->indexreg = nasm_rd_ymmreg[index | ((rex & REX_X) ? 8 : 0)];
+	    else if (index == 4 && !(rex & REX_X))
+		op->indexreg = -1; /* ESP/RSP cannot be an index */
             else if (a64)
 		op->indexreg = nasm_rd_reg64[index | ((rex & REX_X) ? 8 : 0)];
 	    else
@@ -397,7 +390,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
     int op1, op2;
     struct operand *opx, *opy;
     uint8_t opex = 0;
-    int s_field_for = -1;	/* No 144/154 series code encountered */
     bool vex_ok = false;
     int regmask = (segsize == 64) ? 15 : 7;
     enum ea_type eat = EA_SCALAR;
@@ -456,7 +448,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    break;
 	}
 
-	case4(014):
 	case4(0274):
             opx->offset = (int8_t)*data++;
             opx->segment |= SEG_SIGNED;
@@ -488,10 +479,14 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    break;
 
 	case4(040):
-	case4(0254):
             opx->offset = getu32(data);
 	    data += 4;
 	    break;
+
+        case4(0254):
+            opx->offset = gets32(data);
+            data += 4;
+            break;
 
 	case4(044):
 	    switch (asize) {
@@ -532,22 +527,21 @@ static int matches(const struct itemplate *t, uint8_t *data,
             opx->segment &= ~SEG_32BIT;
 	    break;
 
-	case4(064):
+	case4(064):  /* rel */
             opx->segment |= SEG_RELATIVE;
-	    if (osize == 16) {
-		opx->offset = gets16(data);
-		data += 2;
-                opx->segment &= ~(SEG_32BIT|SEG_64BIT);
-	    } else if (osize == 32) {
-		opx->offset = gets32(data);
-		data += 4;
-                opx->segment &= ~SEG_64BIT;
-                opx->segment |= SEG_32BIT;
-	    }
-            if (segsize != osize) {
-                opx->type =
-                    (opx->type & ~SIZE_MASK)
-                    | ((osize == 16) ? BITS16 : BITS32);
+            /* In long mode rel is always 32 bits, sign extended. */
+            if (segsize == 64 || osize == 32) {
+                opx->offset = gets32(data);
+                data += 4;
+                if (segsize != 64)
+                    opx->segment |= SEG_32BIT;
+                opx->type = (opx->type & ~SIZE_MASK)
+                    | (segsize == 64 ? BITS64 : BITS32);
+            } else {
+                opx->offset = gets16(data);
+                data += 2;
+                opx->segment &= ~SEG_32BIT;
+                opx->type = (opx->type & ~SIZE_MASK) | BITS16;
             }
 	    break;
 
@@ -570,33 +564,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
             opx->basereg = ((modrm >> 3) & 7) + (ins->rex & REX_R ? 8 : 0);
 	    break;
 	}
-
-	case4(0140):
-	    if (s_field_for == op1) {
-		opx->offset = gets8(data);
-		data++;
-	    } else {
-		opx->offset = getu16(data);
-		data += 2;
-	    }
-	    break;
-
-	case4(0144):
-	case4(0154):
-	    s_field_for = (*data & 0x02) ? op1 : -1;
-	    if ((*data++ & ~0x02) != *r++)
-		return false;
-	    break;
-
-	case4(0150):
-	    if (s_field_for == op1) {
-		opx->offset = gets8(data);
-		data++;
-	    } else {
-		opx->offset = getu32(data);
-		data += 4;
-	    }
-	    break;
 
 	case 0172:
 	{
@@ -648,16 +615,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    break;
 	}
 
-	case4(0250):
-	    if (s_field_for == op1) {
-		opx->offset = gets8(data);
-		data++;
-	    } else {
-		opx->offset = gets32(data);
-		data += 4;
-	    }
-	    break;
-
 	case4(0260):
 	case 0270:
 	{
@@ -702,6 +659,27 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    vex_ok = true;
 	    break;
 	}
+
+        case 0271:
+            if (prefix->rep == 0xF3)
+                drep = P_XRELEASE;
+            break;
+
+        case 0272:
+            if (prefix->rep == 0xF2)
+                drep = P_XACQUIRE;
+            else if (prefix->rep == 0xF3)
+                drep = P_XRELEASE;
+            break;
+
+        case 0273:
+            if (prefix->lock == 0xF0) {
+                if (prefix->rep == 0xF2)
+                    drep = P_XACQUIRE;
+                else if (prefix->rep == 0xF3)
+                    drep = P_XRELEASE;
+            }
+            break;
 
 	case 0310:
             if (asize != 16)
@@ -798,6 +776,11 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    break;
 	}
 
+        case 0326:
+            if (prefix->rep == 0xF3)
+                return false;
+            break;
+
 	case 0331:
             if (prefix->rep)
                 return false;
@@ -840,10 +823,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    dwait = 0;
 	    break;
 
-	case4(0344):
-	    ins->oprs[0].basereg = (*data++ >> 3) & 7;
-	    break;
-
 	case 0360:
 	    if (prefix->osp || prefix->rep)
 		return false;
@@ -853,18 +832,6 @@ static int matches(const struct itemplate *t, uint8_t *data,
 	    if (!prefix->osp || prefix->rep)
 		return false;
 	    o_used = true;
-	    break;
-
-	case 0362:
-	    if (prefix->osp || prefix->rep != 0xf2)
-		return false;
-	    drep = 0;
-	    break;
-
-	case 0363:
-	    if (prefix->osp || prefix->rep != 0xf3)
-		return false;
-	    drep = 0;
 	    break;
 
 	case 0364:
@@ -888,6 +855,10 @@ static int matches(const struct itemplate *t, uint8_t *data,
 		return false;
 	    a_used = true;
 	    break;
+
+        case 0370:
+        case 0371:
+            break;
 
         case 0374:
             eat = EA_XMMVSIB;
@@ -918,14 +889,14 @@ static int matches(const struct itemplate *t, uint8_t *data,
     }
 
     if (lock) {
-	if (ins->prefixes[PPS_LREP])
+	if (ins->prefixes[PPS_LOCK])
 	    return false;
-	ins->prefixes[PPS_LREP] = P_LOCK;
+	ins->prefixes[PPS_LOCK] = P_LOCK;
     }
     if (drep) {
-	if (ins->prefixes[PPS_LREP])
+	if (ins->prefixes[PPS_REP])
 	    return false;
-        ins->prefixes[PPS_LREP] = drep;
+        ins->prefixes[PPS_REP] = drep;
     }
     ins->prefixes[PPS_WAIT] = dwait;
     if (!o_used) {
@@ -1141,8 +1112,7 @@ int32_t disasm(uint8_t *data, char *output, int outbufsize, int segsize,
 	     * XXX: Need to make sure this is actually correct.
              */
             for (i = 0; i < (*p)->operands; i++) {
-                if (!((*p)->opd[i] & SAME_AS) &&
-		    (
+                if (
 			/* If it's a mem-only EA but we have a
 			   register, die. */
 			((tmp_ins.oprs[i].segment & SEG_RMREG) &&
@@ -1158,7 +1128,7 @@ int32_t disasm(uint8_t *data, char *output, int outbufsize, int segsize,
 			  (tmp_ins.oprs[i].segment & SEG_RMREG)) &&
 			 !whichreg((*p)->opd[i],
 				   tmp_ins.oprs[i].basereg, tmp_ins.rex))
-			)) {
+			) {
                     works = false;
                     break;
                 }
@@ -1228,11 +1198,6 @@ int32_t disasm(uint8_t *data, char *output, int outbufsize, int segsize,
 	opflags_t t = (*p)->opd[i];
 	const operand *o = &ins.oprs[i];
 	int64_t offs;
-
-	if (t & SAME_AS) {
-	    o = &ins.oprs[t & ~SAME_AS];
-	    t = (*p)->opd[t & ~SAME_AS];
-	}
 
         output[slen++] = (colon ? ':' : i == 0 ? ' ' : ',');
 

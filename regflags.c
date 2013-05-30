@@ -53,7 +53,7 @@ const opflags_t nasm_reg_flags[] = {
     REG_DREG,       /* dr7   */
     REG_DREG,       /* dr8   */
     REG_DREG,       /* dr9   */
-    REG_DESS,       /* ds    */
+    REG_DS,         /* ds    */
     REG_DX,         /* dx    */
     REG_EAX,        /* eax   */
     REG32NA,        /* ebp   */
@@ -61,11 +61,11 @@ const opflags_t nasm_reg_flags[] = {
     REG_ECX,        /* ecx   */
     REG32NA,        /* edi   */
     REG_EDX,        /* edx   */
-    REG_DESS,       /* es    */
+    REG_ES,         /* es    */
     REG32NA,        /* esi   */
     REG32NA,        /* esp   */
-    REG_FSGS,       /* fs    */
-    REG_FSGS,       /* gs    */
+    REG_FS,         /* fs    */
+    REG_GS,         /* gs    */
     MMXREG,         /* mm0   */
     MMXREG,         /* mm1   */
     MMXREG,         /* mm2   */
@@ -120,7 +120,7 @@ const opflags_t nasm_reg_flags[] = {
     REG8NA,         /* sil   */
     REG16NA,        /* sp    */
     REG8NA,         /* spl   */
-    REG_DESS,       /* ss    */
+    REG_SS,         /* ss    */
     FPU0,           /* st0   */
     FPUREG,         /* st1   */
     FPUREG,         /* st2   */

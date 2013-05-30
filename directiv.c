@@ -9,7 +9,7 @@
 #include "hashtbl.h"
 #include "directiv.h"
 
-const char * const directives[26] = 
+const char * const directives[26] =
 {
     NULL,
     NULL,

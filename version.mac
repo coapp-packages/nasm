@@ -1,6 +1,7 @@
 %define __NASM_MAJOR__ 2
-%define __NASM_MINOR__ 9
-%define __NASM_SUBMINOR__ 99
-%define __NASM_PATCHLEVEL__ 98
-%define __NASM_VERSION_ID__ 002096362h
-%define __NASM_VER__ "2.10rc8"
+%define __NASM_MINOR__ 10
+%define __NASM_SUBMINOR__ 7
+%define __NASM_PATCHLEVEL__ 0
+%define __NASM_SNAPSHOT__ 20130524
+%define __NASM_VERSION_ID__ 0020A0700h
+%define __NASM_VER__ "2.10.07-20130524"

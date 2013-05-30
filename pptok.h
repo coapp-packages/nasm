@@ -50,79 +50,50 @@ enum preproc_token {
     PP_IFNSTR        =  53,
     PP_IFTOKEN       =  54,
     PP_IFNTOKEN      =  55,
-    PP_WHILE         =  64,
-    PP_WHILEN        =  65,
-    PP_WHILECTX      =  66,
-    PP_WHILENCTX     =  67,
-    PP_WHILEDEF      =  68,
-    PP_WHILENDEF     =  69,
-    PP_WHILEEMPTY    =  70,
-    PP_WHILENEMPTY   =  71,
-    PP_WHILEENV      =  72,
-    PP_WHILENENV     =  73,
-    PP_WHILEID       =  74,
-    PP_WHILENID      =  75,
-    PP_WHILEIDN      =  76,
-    PP_WHILENIDN     =  77,
-    PP_WHILEIDNI     =  78,
-    PP_WHILENIDNI    =  79,
-    PP_WHILEMACRO    =  80,
-    PP_WHILENMACRO   =  81,
-    PP_WHILENUM      =  82,
-    PP_WHILENNUM     =  83,
-    PP_WHILESTR      =  84,
-    PP_WHILENSTR     =  85,
-    PP_WHILETOKEN    =  86,
-    PP_WHILENTOKEN   =  87,
-    PP_ARG           =  96,
-    PP_ASSIGN        =  97,
-    PP_CLEAR         =  98,
-    PP_COMMENT       =  99,
-    PP_DEFINE        = 100,
-    PP_DEFSTR        = 101,
-    PP_DEFTOK        = 102,
-    PP_DEPEND        = 103,
-    PP_ELSE          = 104,
-    PP_ENDCOMMENT    = 105,
-    PP_ENDIF         = 106,
-    PP_ENDM          = 107,
-    PP_ENDMACRO      = 108,
-    PP_ENDREP        = 109,
-    PP_ENDWHILE      = 110,
-    PP_ERROR         = 111,
-    PP_EXITMACRO     = 112,
-    PP_EXITREP       = 113,
-    PP_EXITWHILE     = 114,
-    PP_FATAL         = 115,
-    PP_FINAL         = 116,
-    PP_IASSIGN       = 117,
-    PP_IDEFINE       = 118,
-    PP_IDEFSTR       = 119,
-    PP_IDEFTOK       = 120,
-    PP_IMACRO        = 121,
-    PP_INCLUDE       = 122,
-    PP_IRMACRO       = 123,
-    PP_IXDEFINE      = 124,
-    PP_LINE          = 125,
-    PP_LOCAL         = 126,
-    PP_MACRO         = 127,
-    PP_PATHSEARCH    = 128,
-    PP_POP           = 129,
-    PP_PUSH          = 130,
-    PP_REP           = 131,
-    PP_REPL          = 132,
-    PP_RMACRO        = 133,
-    PP_ROTATE        = 134,
-    PP_STACKSIZE     = 135,
-    PP_STRCAT        = 136,
-    PP_STRLEN        = 137,
-    PP_SUBSTR        = 138,
-    PP_UNDEF         = 139,
-    PP_UNIMACRO      = 140,
-    PP_UNMACRO       = 141,
-    PP_USE           = 142,
-    PP_WARNING       = 143,
-    PP_XDEFINE       = 144,
+    PP_ARG           =  64,
+    PP_ASSIGN        =  65,
+    PP_CLEAR         =  66,
+    PP_DEFINE        =  67,
+    PP_DEFSTR        =  68,
+    PP_DEFTOK        =  69,
+    PP_DEPEND        =  70,
+    PP_ELSE          =  71,
+    PP_ENDIF         =  72,
+    PP_ENDM          =  73,
+    PP_ENDMACRO      =  74,
+    PP_ENDREP        =  75,
+    PP_ERROR         =  76,
+    PP_EXITMACRO     =  77,
+    PP_EXITREP       =  78,
+    PP_FATAL         =  79,
+    PP_IASSIGN       =  80,
+    PP_IDEFINE       =  81,
+    PP_IDEFSTR       =  82,
+    PP_IDEFTOK       =  83,
+    PP_IMACRO        =  84,
+    PP_INCLUDE       =  85,
+    PP_IRMACRO       =  86,
+    PP_IXDEFINE      =  87,
+    PP_LINE          =  88,
+    PP_LOCAL         =  89,
+    PP_MACRO         =  90,
+    PP_PATHSEARCH    =  91,
+    PP_POP           =  92,
+    PP_PUSH          =  93,
+    PP_REP           =  94,
+    PP_REPL          =  95,
+    PP_RMACRO        =  96,
+    PP_ROTATE        =  97,
+    PP_STACKSIZE     =  98,
+    PP_STRCAT        =  99,
+    PP_STRLEN        = 100,
+    PP_SUBSTR        = 101,
+    PP_UNDEF         = 102,
+    PP_UNIMACRO      = 103,
+    PP_UNMACRO       = 104,
+    PP_USE           = 105,
+    PP_WARNING       = 106,
+    PP_XDEFINE       = 107,
     PP_INVALID       =  -1
 };
 
@@ -195,28 +166,3 @@ enum pp_conditional {
 	case PP_IFNSTR:\
 	case PP_IFTOKEN: \
 	case PP_IFNTOKEN
-#define CASE_PP_WHILE \
-	case PP_WHILE: \
-	case PP_WHILEN:\
-	case PP_WHILECTX: \
-	case PP_WHILENCTX:\
-	case PP_WHILEDEF: \
-	case PP_WHILENDEF:\
-	case PP_WHILEEMPTY: \
-	case PP_WHILENEMPTY:\
-	case PP_WHILEENV: \
-	case PP_WHILENENV:\
-	case PP_WHILEID: \
-	case PP_WHILENID:\
-	case PP_WHILEIDN: \
-	case PP_WHILENIDN:\
-	case PP_WHILEIDNI: \
-	case PP_WHILENIDNI:\
-	case PP_WHILEMACRO: \
-	case PP_WHILENMACRO:\
-	case PP_WHILENUM: \
-	case PP_WHILENNUM:\
-	case PP_WHILESTR: \
-	case PP_WHILENSTR:\
-	case PP_WHILETOKEN: \
-	case PP_WHILENTOKEN

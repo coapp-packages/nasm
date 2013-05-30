@@ -12,7 +12,7 @@ docdir		= $(prefix)/doc/nasm
 infodir		= ${datarootdir}/info
 datarootdir	= ${prefix}/share
 
-INSTALL		= /usr/bin/install -c
+INSTALL		= /bin/install -c
 INSTALL_PROGRAM	= ${INSTALL}
 INSTALL_DATA	= ${INSTALL} -m 644
 

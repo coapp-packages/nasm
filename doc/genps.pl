@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ## --------------------------------------------------------------------------
 ##   
-##   Copyright 1996-2009 The NASM Authors - All Rights Reserved
+##   Copyright 1996-2012 The NASM Authors - All Rights Reserved
 ##   See the file AUTHORS included with the NASM distribution for
 ##   the specific copyright holders.
 ##
@@ -1147,6 +1147,13 @@ if ( defined($metadata{epslogo}) &&
 
 	$x = ($psconf{pagewidth}-$width*$scale)/2;
 	$y = ($psconf{pageheight}-$height*$scale)/2;
+
+	if ( defined($metadata{logoxadj}) ) {
+	    $x += $metadata{logoxadj};
+	}
+	if ( defined($metadata{logoyadj}) ) {
+	    $y += $metadata{logoyadj};
+	}
 
 	print "BeginEPSF\n";
 	print $x, ' ', $y, " translate\n";

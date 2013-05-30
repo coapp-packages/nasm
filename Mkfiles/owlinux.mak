@@ -66,13 +66,15 @@ NASM =	nasm.$(O) nasmlib.$(O) ver.$(O) \
 	output/nullout.$(O) \
 	output/outbin.$(O) output/outaout.$(O) output/outcoff.$(O) \
 	output/outelf.$(O) output/outelf32.$(O) output/outelf64.$(O) \
+	output/outelfx32.$(O) \
 	output/outobj.$(O) output/outas86.$(O) output/outrdf2.$(O) \
 	output/outdbg.$(O) output/outieee.$(O) output/outmac32.$(O) \
 	output/outmac64.$(O) preproc.$(O) quote.$(O) pptok.$(O) \
 	macros.$(O) listing.$(O) eval.$(O) exprlib.$(O) stdscan.$(O) \
 	strfunc.$(O) tokhash.$(O) regvals.$(O) regflags.$(O) \
 	ilog2.$(O) \
-	lib/strlcpy.$(O)
+	lib/strlcpy.$(O) \
+	preproc-nop.$(O)
 
 NDISASM = ndisasm.$(O) disasm.$(O) sync.$(O) nasmlib.$(O) ver.$(O) \
 	insnsd.$(O) insnsb.$(O) insnsn.$(O) regs.$(O) regdis.$(O)
@@ -297,6 +299,10 @@ output/outelf64.$(O): output/outelf64.c compiler.h directiv.h eval.h \
  insnsi.h nasm.h nasmlib.h opflags.h output/dwarf.h output/elf.h \
  output/outelf.h output/outform.h output/outlib.h output/stabs.h pptok.h \
  preproc.h raa.h rbtree.h regs.h saa.h stdscan.h
+output/outelfx32.$(O): output/outelfx32.c compiler.h directiv.h eval.h \
+ insnsi.h nasm.h nasmlib.h opflags.h output/dwarf.h output/elf.h \
+ output/outelf.h output/outform.h output/outlib.h output/stabs.h pptok.h \
+ preproc.h raa.h rbtree.h regs.h saa.h stdscan.h
 output/outform.$(O): output/outform.c compiler.h directiv.h insnsi.h nasm.h \
  nasmlib.h opflags.h output/outform.h pptok.h preproc.h regs.h
 output/outieee.$(O): output/outieee.c compiler.h directiv.h insnsi.h nasm.h \
@@ -320,6 +326,8 @@ parser.$(O): parser.c compiler.h directiv.h eval.h float.h insns.h insnsi.h \
  nasm.h nasmlib.h opflags.h parser.h pptok.h preproc.h regs.h stdscan.h \
  tables.h tokens.h
 pptok.$(O): pptok.c compiler.h hashtbl.h nasmlib.h pptok.h preproc.h
+preproc-nop.$(O): preproc-nop.c compiler.h directiv.h insnsi.h nasm.h \
+ nasmlib.h opflags.h pptok.h preproc.h regs.h
 preproc.$(O): preproc.c compiler.h directiv.h eval.h hashtbl.h insnsi.h \
  nasm.h nasmlib.h opflags.h pptok.h preproc.h quote.h regs.h stdscan.h \
  tables.h tokens.h

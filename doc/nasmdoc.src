@@ -1,6 +1,6 @@
 \# --------------------------------------------------------------------------
 \#
-\#   Copyright 1996-2011 The NASM Authors - All Rights Reserved
+\#   Copyright 1996-2012 The NASM Authors - All Rights Reserved
 \#   See the file AUTHORS included with the NASM distribution for
 \#   the specific copyright holders.
 \#
@@ -35,7 +35,7 @@
 \#
 \M{category}{Programming}
 \M{title}{NASM - The Netwide Assembler}
-\M{year}{1996-2011}
+\M{year}{1996-2012}
 \M{author}{The NASM Development Team}
 \M{copyright_tail}{-- All Rights Reserved}
 \M{license}{This document is redistributable under the license given in the file "LICENSE" distributed in the NASM archive.}
@@ -44,6 +44,7 @@
 \M{infofile}{nasm}
 \M{infotitle}{The Netwide Assembler for x86}
 \M{epslogo}{nasmlogo.eps}
+\M{logoyadj}{-72}
 \IR{-D} \c{-D} option
 \IR{-E} \c{-E} option
 \IR{-F} \c{-F} option
@@ -160,6 +161,7 @@ in \c{elf}
 \IR{elf shared libraries} ELF, shared libraries
 \IR{elf32} \c{elf32}
 \IR{elf64} \c{elf64}
+\IR{elfx32} \c{elfx32}
 \IR{executable and linkable format} Executable and Linkable Format
 \IR{extern, obj extensions to} \c{EXTERN}, \c{obj} extensions to
 \IR{extern, rdf extensions to} \c{EXTERN}, \c{rdf} extensions to
@@ -520,11 +522,11 @@ For Microsoft object file formats (\c{obj}, \c{win32} and \c{win64}),
 it will remove the \c{.asm} \i{extension} (or whatever extension you
 like to use - NASM doesn't care) from your source file name and
 substitute \c{.obj}. For Unix object file formats (\c{aout}, \c{as86},
-\c{coff}, \c{elf32}, \c{elf64}, \c{ieee}, \c{macho32} and \c{macho64})
-it will substitute \c{.o}. For \c{dbg}, \c{rdf}, \c{ith} and \c{srec},
-it will use \c{.dbg}, \c{.rdf}, \c{.ith} and \c{.srec}, respectively,
-and for the \c{bin} format it will simply remove the extension, so
-that \c{myfile.asm} produces the output file \c{myfile}.
+\c{coff}, \c{elf32}, \c{elf64}, \c{elfx32}, \c{ieee}, \c{macho32} and
+\c{macho64}) it will substitute \c{.o}. For \c{dbg}, \c{rdf}, \c{ith}
+and \c{srec}, it will use \c{.dbg}, \c{.rdf}, \c{.ith} and \c{.srec},
+respectively, and for the \c{bin} format it will simply remove the
+extension, so that \c{myfile.asm} produces the output file \c{myfile}.
 
 If the output file already exists, NASM will overwrite it, unless it
 has the same name as the input file, in which case it will give a
@@ -624,7 +626,8 @@ specified by the \c{-o} option.
 The \c{-MQ} option acts as the \c{-MT} option, except it tries to
 quote characters that have special meaning in Makefile syntax.  This
 is not foolproof, as not all characters with special meaning are
-quotable in Make.
+quotable in Make.  The default output (if no \c{-MT} or \c{-MQ} option
+is specified) is automatically quoted.
 
 
 \S{opt-MP} The \i\c{-MP} Option: Emit phony targets
@@ -944,6 +947,13 @@ Disabled by default.
 Enabled by default.
 
 \b \i\c{user} controls \c{%warning} directives (see \k{pperror}).
+Enabled by default.
+
+\b \i\c{lock} warns about \c{LOCK} prefixes on unlockable instructions.
+Enabled by default.
+
+\b \i\c{hle} warns about invalid use of the HLE \c{XACQUIRE} or \c{XRELEASE}
+prefixes.
 Enabled by default.
 
 \b \i\c{error} causes warnings to be treated as errors.  Disabled by
@@ -1587,9 +1597,12 @@ operands to \c{DW}, and so forth.
 
 \S{unicode} \I{UTF-16}\I{UTF-32}\i{Unicode} Strings
 
-The special operators \i\c{__utf16__} and \i\c{__utf32__} allows
-definition of Unicode strings.  They take a string in UTF-8 format and
-converts it to (littleendian) UTF-16 or UTF-32, respectively.
+The special operators \i\c{__utf16__}, \i\c{__utf16le__},
+\i\c{__utf16be__}, \i\c{__utf32__}, \i\c{__utf32le__} and
+\i\c{__utf32be__} allows definition of Unicode strings.  They take a
+string in UTF-8 format and converts it to UTF-16 or UTF-32,
+respectively.  Unless the \c{be} forms are specified, the output is
+littleendian.
 
 For example:
 
@@ -1599,9 +1612,9 @@ For example:
 \c       dw u('C:\WINDOWS'), 0       ; Pathname in UTF-16
 \c       dd w(`A + B = \u206a`), 0   ; String in UTF-32
 
-\c{__utf16__} and \c{__utf32__} can be applied either to strings
-passed to the \c{DB} family instructions, or to character constants in
-an expression context.
+The UTF operators can be applied either to strings passed to the
+\c{DB} family instructions, or to character constants in an expression
+context.
 
 \S{fltconst} \I{floating-point, constants}Floating-Point Constants
 
@@ -1775,15 +1788,23 @@ Since the \c{%} character is used extensively by the macro
 modulo operators are followed by white space wherever they appear.
 
 
-\S{expmul} \i{Unary Operators}: \I{+ opunary}\c{+}, \I{- opunary}\c{-},
-\i\c{~}, \I{! opunary}\c{!} and \i\c{SEG}
+\S{expmul} \i{Unary Operators}
 
-The highest-priority operators in NASM's expression grammar are
-those which only apply to one argument. \c{-} negates its operand,
-\c{+} does nothing (it's provided for symmetry with \c{-}), \c{~}
-computes the \i{one's complement} of its operand, \c{!} is the
-\i{logical negation} operator, and \c{SEG} provides the \i{segment address}
+The highest-priority operators in NASM's expression grammar are those
+which only apply to one argument.  These are \I{+ opunary}\c{+}, \I{-
+opunary}\c{-}, \i\c{~}, \I{! opunary}\c{!}, \i\c{SEG}, and the
+\i{integer functions} operators.
+
+\c{-} negates its operand, \c{+} does nothing (it's provided for
+symmetry with \c{-}), \c{~} computes the \i{one's complement} of its
+operand, \c{!} is the \i{logical negation} operator.
+
+\c{SEG} provides the \i{segment address}
 of its operand (explained in more detail in \k{segwrt}).
+
+A set of additional operators with leading and trailing double
+underscores are used to implement the integer functions of the
+\c{ifunc} macro package, see \k{pkg_ifunc}.
 
 
 \H{segwrt} \i\c{SEG} and \i\c{WRT}
@@ -2415,22 +2436,6 @@ things like
 \c         silly {13,10}, crlf             ; crlf:      db 13,10
 
 
-\S{mlrmacro} \i{Recursive Multi-Line Macros}: \I\c{%irmacro}\i\c{%rmacro}
-
-A multi-line macro cannot be referenced within itself, in order to
-prevent accidental infinite recursion and allow instruction overloading.
-
-Recursive multi-line macros allow for self-referencing, with the
-caveat that the user is aware of the existence, use and purpose of
-recursive multi-line macros. There is also a generous, but sane, upper
-limit to the number of recursions, in order to prevent run-away memory
-consumption in case of accidental infinite recursion.
-
-As with non-recursive multi-line macros, recursive multi-line macros are
-\i{case-sensitive}, unless you define them using the alternative
-directive \c{%irmacro}.
-
-
 \S{mlmacover} Overloading Multi-Line Macros\I{overloading, multi-line macros}
 
 As with single-line macros, multi-line macros can be overloaded by
@@ -2888,22 +2893,6 @@ does \e{not} remove the macro \c{bar}, since the argument
 specification does not match exactly.
 
 
-\S{exitmacro} Exiting Multi-Line Macros: \i\c{%exitmacro}
-
-Multi-line macro expansions can be arbitrarily terminated with
-the \c{%exitmacro} directive.
-
-For example:
-
-\c %macro foo 1-3
-\c         ; Do something
-\c     %if<condition>
-\c         %exitmacro
-\c     %endif
-\c         ; Do something
-\c %endmacro
-
-
 \H{condasm} \i{Conditional Assembly}\I\c{%if}
 
 Similarly to the C preprocessor, NASM allows sections of a source
@@ -3221,17 +3210,6 @@ be gradually used up and other applications to start crashing.
 
 Note a maximum repeat count is limited by 62 bit number, though it
 is hardly possible that you ever need anything bigger.
-
-
-\H{while} \i{Conditional Loops}: \i\c{%while}
-
-The directives \c{%while} and \i\c{%endwhile} combine preprocessor
-loops with conditional assembly, allowing the enclosed chunk of
-code to be replicated as long as certain conditions are met:
-
-\c %while<condition>
-\c     ; some code which only repeats while <condition> is met
-\c %endwhile
 
 
 \H{files} Source Files and Dependencies
@@ -3806,12 +3784,15 @@ variable, for example:
 \c %defstr C_colon      %!'C:'
 
 
-\S{final} \i\c{%final} Directive
+\H{comment} Comment Blocks: \i\c{%comment}
 
-The \c{%final} directive is used to delay preprocessing of a line
-until all other "normal" preprocessing is complete.  Multiple
-\c{%final} directives are processed in the opposite order of their
-declaration, last one first and first one last.
+The \c{%comment} and \c{%endcomment} directives are used to specify
+a block of commented (i.e. unprocessed) code/text. Everything between
+\c{%comment} and \c{%endcomment} will be ignored by the preprocessor.
+
+\c %comment
+\c     ; some code, text or data to be ignored
+\c %endcomment
 
 
 \H{stdmac} \i{Standard Macros}
@@ -4302,6 +4283,34 @@ This packages contains the following floating-point convenience macros:
 \c %define float80e(x)     __float80e__(x)
 \c %define float128l(x)    __float128l__(x)
 \c %define float128h(x)    __float128h__(x)
+
+
+\H{pkg_ifunc} \i\c{ifunc}: \i{Integer functions}
+
+This package contains a set of macros which implement integer
+functions.  These are actually implemented as special operators, but
+are most conveniently accessed via this macro package.
+
+The macros provided are:
+
+\S{ilog2} \i{Integer logarithms}
+
+These functions calculate the integer logarithm base 2 of their
+argument, considered as an unsigned integer.  The only differences
+between the functions is their behavior if the argument provided is
+not a power of two.
+
+The function \i\c{ilog2e()} (alias \i\c{ilog2()}) generate an error if
+the argument is not a power of two.
+
+The function \i\c{ilog2w()} generate a warning if the argument is not
+a power of two.
+
+The function \i\c{ilog2f()} rounds the argument down to the nearest
+power of two; if the argument is zero it returns zero.
+
+The function \i\c{ilog2c()} rounds the argument up to the nearest
+power of two.
 
 
 \C{directive} \i{Assembler Directives}
@@ -5378,20 +5387,21 @@ While \c{REL} takes good care of RIP-relative addressing, there is one
 aspect that is easy to overlook for a Win64 programmer: indirect
 references. Consider a switch dispatch table:
 
-\c         jmp     QWORD[dsptch+rax*8]
+\c         jmp     qword [dsptch+rax*8]
 \c         ...
 \c dsptch: dq      case0
 \c         dq      case1
 \c         ...
 
-Even novice Win64 assembler programmer will soon realize that the code
+Even a novice Win64 assembler programmer will soon realize that the code
 is not 64-bit savvy. Most notably linker will refuse to link it with
-"\c{'ADDR32' relocation to '.text' invalid without
-/LARGEADDRESSAWARE:NO}". So [s]he will have to split jmp instruction as
-following:
+
+\c 'ADDR32' relocation to '.text' invalid without /LARGEADDRESSAWARE:NO
+
+So [s]he will have to split jmp instruction as following:
 
 \c         lea     rbx,[rel dsptch]
-\c         jmp     QWORD[rbx+rax*8]
+\c         jmp     qword [rbx+rax*8]
 
 What happens behind the scene is that effective address in \c{lea} is
 encoded relative to instruction pointer, or in perfectly
@@ -5404,7 +5414,7 @@ to current process, which kind of undermines the idea of sharing .dll.
 But no worry, it's trivial to fix:
 
 \c         lea     rbx,[rel dsptch]
-\c         add     rbx,QWORD[rbx+rax*8]
+\c         add     rbx,[rbx+rax*8]
 \c         jmp     rbx
 \c         ...
 \c dsptch: dq      case0-dsptch
@@ -5419,7 +5429,7 @@ acquainted with PE-COFF format base address denotes start of
 these image-relative references:
 
 \c         lea     rbx,[rel dsptch]
-\c         mov     eax,DWORD[rbx+rax*4]
+\c         mov     eax,[rbx+rax*4]
 \c         sub     rbx,dsptch wrt ..imagebase
 \c         add     rbx,rax
 \c         jmp     rbx
@@ -5635,13 +5645,17 @@ object files suitable for linking with the \i{MacOS X} linker.
 
 \c{macho} provides a default output file-name extension of \c{.o}.
 
-\H{elffmt} \i\c{elf32} and \i\c{elf64}: \I{ELF}\I{linux, elf}\i{Executable and Linkable
+\H{elffmt} \i\c{elf32}, \i\c{elf64}, \i\c{elfx32}: \I{ELF}\I{linux, elf}\i{Executable and Linkable
 Format} Object Files
 
-The \c{elf32} and \c{elf64} output formats generate \c{ELF32 and ELF64} (Executable and Linkable Format) object files, as used by Linux as well as \i{Unix System V},
-including \i{Solaris x86}, \i{UnixWare} and \i{SCO Unix}. \c{elf}
-provides a default output file-name extension of \c{.o}.
-\c{elf} is a synonym for \c{elf32}.
+The \c{elf32}, \c{elf64} and \c{elfx32} output formats generate
+\c{ELF32 and ELF64} (Executable and Linkable Format) object files, as
+used by Linux as well as \i{Unix System V}, including \i{Solaris x86},
+\i{UnixWare} and \i{SCO Unix}. \c{elf} provides a default output
+file-name extension of \c{.o}.  \c{elf} is a synonym for \c{elf32}.
+
+The \c{elfx32} format is used for the \i{x32} ABI, which is a 32-bit
+ABI with the CPU in 64-bit mode.
 
 \S{abisect} ELF specific directive \i\c{osabi}
 
@@ -5779,7 +5793,7 @@ of the symbol with code such as:
 \c 	  mov  [gs:eax],ebx
 
 
-\b In ELF64 mode, referring to an external or global symbol using
+\b In ELF64 or ELFx32 mode, referring to an external or global symbol using
 \c{wrt ..gottpoff} \I\c{..gottpoff}
 causes the linker to build an entry \e{in} the GOT containing the
 offset of the symbol within the TLS block, so you can access the value
@@ -5865,7 +5879,7 @@ these relocations is generated.
 \S{elfdbg} Debug formats and ELF
 \I{ELF, Debug formats and}
 
-\c{ELF32} and \c{ELF64} provide debug information in \c{STABS} and \c{DWARF} formats.
+ELF provides debug information in \c{STABS} and \c{DWARF} formats.
 Line number information is generated for all executable sections, but please
 note that only the ".text" section is executable by default.
 
@@ -7617,7 +7631,7 @@ set to zero.
 \H{reg64} Register Names in 64-bit Mode
 
 NASM uses the following names for general-purpose registers in 64-bit
-mode, for 8-, 16-, 32- and 64-bit references, respecitively:
+mode, for 8-, 16-, 32- and 64-bit references, respectively:
 
 \c      AL/AH, CL/CH, DL/DH, BL/BH, SPL, BPL, SIL, DIL, R8B-R15B
 \c      AX, CX, DX, BX, SP, BP, SI, DI, R8W-R15W
