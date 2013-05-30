@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>nasm</id>
+    <version>2.10.07</version>
+    <authors>Jean-loup Gailly, Mark Adler, Garrett Serack, Tim Rogers</authors>
+    <owners>CoApp Project, Garrett Serack</owners>
+    <licenseUrl>http://repo.or.cz/w/nasm.git/blob_plain/48129e5c8f0523b40ebd7ab4582bf83bbbd6370a:/LICENSE</licenseUrl>
+    <projectUrl>http://www.nasm.us</projectUrl>
+    <iconUrl>http://www.nasm.us/images/nasm.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The Netwide Assembler</description>
+    <releaseNotes>Release notes can be found at: http://www.nasm.us/doc/nasmdocc.html</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <title>The Netwide Assembler</title>
+    <summary>The Netwide Assembler</summary>
+    <tags>nasm, native, CoApp</tags>
+  </metadata>
+  <files>
+    <file src="nasm.xml" target="\build\native\nasm.xml" />
+    <file src="nasm.props" target="\build\native\nasm.props" />
+    <file src="nasm.targets" target="\build\native\nasm.targets" />
+	
+    <file src="..\nasm.exe" target="tools" />
+	<file src="..\ndisasm.exe" target="tools" />
+  </files>
+</package>
